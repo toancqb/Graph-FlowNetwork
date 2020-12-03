@@ -51,11 +51,10 @@ class FlowNet():
         self.node_colors=[ 'lightgrey' for _ in self.G.nodes() ]
         self.node_colors[0]='lightgreen' 
         self.node_colors[self.G.order()-1]='lightblue' 
-
-    def export(self, file_path):
-
         for e in self.G.edges:
             self.G[e[0]][e[1]]['flow'] = 0
+
+    def export(self, file_path):        
 
         labels={ e : '{}|{}'.format(self.G[e[0]][e[1]]['flow'],self.G[e[0]][e[1]]['capacity']) for e in self.G.edges}
         
@@ -65,9 +64,7 @@ class FlowNet():
         plt.show()
         plt.savefig(file_path)
 
-    def show(self):
-        for e in self.G.edges:
-            self.G[e[0]][e[1]]['flow'] = 0
+    def show(self): 
 
         labels={ e : '{}|{}'.format(self.G[e[0]][e[1]]['flow'],self.G[e[0]][e[1]]['capacity']) for e in self.G.edges}
         
