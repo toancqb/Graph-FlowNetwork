@@ -13,6 +13,7 @@ n.compute_max_flow()
 
 print("Max Flow: ", n.get_flow())
 
+print("----------------------")
 n.update('a', 'c', 9)
 
 print("Max Flow: ", n.get_flow())

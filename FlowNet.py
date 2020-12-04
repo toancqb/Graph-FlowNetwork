@@ -80,19 +80,60 @@ class FlowNet():
         plt.show()
 
     def compute_max_flow(self):
-        for e in self.G.edges:
-            self.G[e[0]][e[1]]['flow'] = 0
-        self.current_max_flow = self.Edmonds_Karp(self.source, self.sink)
-        self.is_calcule_maxflow_first_time = True
+        if (not self.is_calcule_maxflow_first_time):
+            self.current_max_flow = self.Edmonds_Karp(self.source, self.sink)
+            self.is_calcule_maxflow_first_time = True
+        else:
+            self.current_max_flow += self.Edmonds_Karp(self.source, self.sink)
 
     def get_flow(self):
         if not self.is_calcule_maxflow_first_time:
             sys.exit("Error: Need to compute max flow before get max flow value")
         return self.current_max_flow
 
-    def update(self, node1, node2, capacity):
+    def update_step_2(self, node1, node2, capacity):
+        self.G[node1][node2]['capacity'] = capacity
+        for e in self.G.edges:
+            self.G[e[0]][e[1]]['flow'] = 0
+        self.compute_max_flow()
+
+    def update_step_3(self, node1, node2, capacity):
         self.G[node1][node2]['capacity'] = capacity
         self.compute_max_flow()
+
+    def update_step_4(self, node1, node2, capacity):
+        if capacity >= self.G[node1][node2]['flow']:
+            self.G[node1][node2]['capacity'] = capacity
+            return None
+
+        rm = self.G[node1][node2]['flow'] - capacity
+        self.current_max_flow -= rm
+        self.G[node1][node2]['capacity'], self.G[node1][node2]['flow'] = capacity, capacity
+        path = self.find_shortest_path(self.source, node1)
+        i = 0
+        while i < len(path)-1:
+            if self.G[path[i]][path[i+1]]['flow'] >= rm:
+                self.G[path[i]][path[i+1]]['flow'] -= rm
+            i += 1
+        path = self.find_shortest_path(node2, self.sink)
+        i = 0
+        while i < len(path)-1:
+            if self.G[path[i]][path[i+1]]['flow'] >= rm:
+                self.G[path[i]][path[i+1]]['flow'] -= rm
+            i += 1
+        path = self.find_shortest_path(self.source, self.sink)
+        if path != None:        
+            bottle_neck = self.get_bottle_neck(path)
+            self.update_flow(path, bottle_neck)
+            self.current_max_flow += bottle_neck
+            # print(path)
+
+    def update(self, node1, node2, capacity):
+        if self.G[node1][node2]['capacity'] < capacity:
+            self.update_step_3(node1, node2, capacity)
+        elif self.G[node1][node2]['capacity'] > capacity:
+            self.update_step_4(node1, node2, capacity)
+
 
     """
     End of API List!
@@ -146,7 +187,7 @@ class FlowNet():
     def Edmonds_Karp(self, start, end):
         i = 0
         max_flow = 0
-        while i < 10:
+        while True:
             path = self.find_shortest_path(start, end)
             if path == None:
                 break
@@ -154,7 +195,7 @@ class FlowNet():
             self.update_flow(path, bottle_neck)
             max_flow += bottle_neck
             i += 1
-            print(path)
+            # print(path)
 
         return max_flow
 
