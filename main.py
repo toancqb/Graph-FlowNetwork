@@ -1,21 +1,20 @@
 from FlowNet import FlowNet
+import sys
 
-n = FlowNet("TestCase/fig42.csv")
+if len(sys.argv) != 5:
+    print(str(sys.argv))
+    sys.exit("Invalid Arguments\nUsage: python3 main.py fileName.csv node1 node2 capacity")
 
+n = FlowNet(sys.argv[1])
 
-# print(len(n.G.nodes))
-# print(n.G.nodes)
-# print(n.G.edges)
-source = list(n.G.nodes)[0]
-sink = list(n.G.nodes)[len(n.G.nodes)-1]
-# print(source, sink)
 n.compute_max_flow()
 
-print("Max Flow: ", n.get_flow())
+print(n.get_flow())
 
-print("----------------------")
-n.update('a', 'c', 9)
+n.export("graph_before.png")
 
-print("Max Flow: ", n.get_flow())
+n.update(sys.argv[2], sys.argv[3], int(sys.argv[4]))
 
-n.show()
+print(n.get_flow())
+
+n.export("graph_after.png")
